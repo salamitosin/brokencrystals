@@ -25,13 +25,13 @@ jobs:
     - name: Log in to Docker Hub
       run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
 
-    # Scan Docker image with Docker Scout
-    - name: Scan with Docker Scout
-      run: |
-        docker run --rm \
-        -v /var/run/docker.sock:/var/run/docker.sock \
-        docker/scout:latest \
-        scout brokencrystals:latest --output scout-report.html
+    # # Scan Docker image with Docker Scout
+    # - name: Scan with Docker Scout
+    #   run: |
+    #     docker run --rm \
+    #     -v /var/run/docker.sock:/var/run/docker.sock \
+    #     docker/scout:latest \
+    #     scout brokencrystals:latest --output scout-report.html
 
     - name: Scan Docker Image with Trivy
       # Scan Docker image with Trivy
