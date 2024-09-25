@@ -13,72 +13,81 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
-
-    - name: Install Docker Compose
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y docker-compose
-
-    - name: Build Docker image using docker-compose.local.yml
-      run: docker-compose -f docker-compose.local.yml build | tee docker-build-log.txt
-
-    - name: Verify Docker image is built
-      run: |
-        docker images | grep brokencrystals_nodejs || { echo "Image brokencrystals_nodejs:latest not found."; exit 1; }
-
-    - name: Tag Docker Image
-      run: |
-        docker tag brokencrystals_nodejs:latest docker.io/${{ secrets.DOCKER_HUB_USERNAME }}/brokencrystals_nodejs:${{ github.sha }}
-
-    - name: Log in to Docker Hub
-      run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
-
-    - name: Push Docker image to Docker Hub
-      run: docker push docker.io/${{ secrets.DOCKER_HUB_USERNAME }}/brokencrystals_nodejs:${{ github.sha }}
-
-    - name: Scan with Docker Scout
-      run: |
-        docker run --rm \
-        -v /var/run/docker.sock:/var/run/docker.sock \
-        docker/scout:latest \
-        scout docker.io/${{ secrets.DOCKER_HUB_USERNAME }}/brokencrystals_nodejs:${{ github.sha }} --output scout-report.html
-
-    - name: Scan Docker Image with Trivy
-      run: |
-        docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image docker.io/${{ secrets.DOCKER_HUB_USERNAME }}/brokencrystals_nodejs:${{ github.sha }} \
-        --format template --template "@contrib/html.tpl" -o trivy-scan-report.html
-
-    - name: Run OWASP ZAP DAST
-      run: |
-        docker run -v $(pwd):/zap/wrk/:rw --network="host" owasp/zap2docker-stable zap-baseline.py \
-        -t http://localhost:3000 -r owasp-zap-dast-report.html
-
-    - name: Upload Docker Scout Report
-      uses: actions/upload-artifact@v3
       with:
-        name: docker-scout-report
-        path: scout-report.html
+        fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
+    - name: Static analysis security test
+    - uses: sonarsource/sonarqube-scan-action@master
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
-    - name: Upload Trivy Docker Scan Report
-      uses: actions/upload-artifact@v3
-      with:
-        name: trivy-scan-report
-        path: trivy-scan-report.html
 
-    - name: Upload OWASP ZAP DAST Report
-      uses: actions/upload-artifact@v3
-      with:
-        name: owasp-zap-dast-report
-        path: owasp-zap-dast-report.html
 
-    - name: Upload Docker Build Log
-      uses: actions/upload-artifact@v3
-      with:
-        name: docker-build-log
-        path: docker-build-log.txt
+# - name: Set up Docker Buildx
+#   uses: docker/setup-buildx-action@v2
 
-    - name: View Docker Image
-      run: echo "hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii"
+# - name: Install Docker Compose
+#   run: |
+#     sudo apt-get update
+#     sudo apt-get install -y docker-compose
+
+# - name: Build Docker image using docker-compose.local.yml
+#   run: docker-compose -f docker-compose.local.yml build | tee docker-build-log.txt
+
+# - name: Verify Docker image is built
+#   run: |
+#     docker images | grep brokencrystals_nodejs || { echo "Image brokencrystals_nodejs:latest not found."; exit 1; }
+
+# - name: Tag Docker Image
+#   run: |
+#     docker tag brokencrystals_nodejs:latest docker.io/${{ secrets.DOCKER_HUB_USERNAME }}/brokencrystals_nodejs:${{ github.sha }}
+
+# - name: Log in to Docker Hub
+#   run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
+
+# - name: Push Docker image to Docker Hub
+#   run: docker push docker.io/${{ secrets.DOCKER_HUB_USERNAME }}/brokencrystals_nodejs:${{ github.sha }}
+
+# - name: Scan with Docker Scout
+#   run: |
+#     docker run --rm \
+#     -v /var/run/docker.sock:/var/run/docker.sock \
+#     docker/scout:latest \
+#     scout docker.io/${{ secrets.DOCKER_HUB_USERNAME }}/brokencrystals_nodejs:${{ github.sha }} --output scout-report.html
+
+# - name: Scan Docker Image with Trivy
+#   run: |
+#     docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image docker.io/${{ secrets.DOCKER_HUB_USERNAME }}/brokencrystals_nodejs:${{ github.sha }} \
+#     --format template --template "@contrib/html.tpl" -o trivy-scan-report.html
+
+# - name: Run OWASP ZAP DAST
+#   run: |
+#     docker run -v $(pwd):/zap/wrk/:rw --network="host" owasp/zap2docker-stable zap-baseline.py \
+#     -t http://localhost:3000 -r owasp-zap-dast-report.html
+
+# - name: Upload Docker Scout Report
+#   uses: actions/upload-artifact@v3
+#   with:
+#     name: docker-scout-report
+#     path: scout-report.html
+
+# - name: Upload Trivy Docker Scan Report
+#   uses: actions/upload-artifact@v3
+#   with:
+#     name: trivy-scan-report
+#     path: trivy-scan-report.html
+
+# - name: Upload OWASP ZAP DAST Report
+#   uses: actions/upload-artifact@v3
+#   with:
+#     name: owasp-zap-dast-report
+#     path: owasp-zap-dast-report.html
+
+# - name: Upload Docker Build Log
+#   uses: actions/upload-artifact@v3
+#   with:
+#     name: docker-build-log
+#     path: docker-build-log.txt
+
+# - name: View Docker Image
+#   run: echo "hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii"
