@@ -10,39 +10,36 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
+    services:
+      sonarqube:
+        image: sonarqube
+        ports:
+        - 9000:9000
+        options: >-
+          --health-cmd="curl -f http://localhost:9000/api/system/health" --health-interval=30s --health-timeout=5s --health-retries=5
+        env:
+          SONAR_JDBC_URL: jdbc:h2:tcp://localhost:9092/sonar;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+          SONAR_JDBC_DRIVER: org.h2.Driver
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
       with:
         fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
 
-    - name: SonarQube Scan SAST
+    - name: Wait for SonarQube to be ready
+      run: |
+        echo "Waiting for SonarQube to start..."
+        for i in $(seq 1 30); do
+          curl -s http://localhost:9000/api/system/health | grep -q '"status":"OK"' && break
+          echo "SonarQube is not ready yet..."
+          sleep 10
+        done
+
+    - name: SonarQube Scan
       uses: sonarsource/sonarqube-scan-action@master
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        SONAR_HOST_URL: "http://localhost:9000"
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
-
-    - name: Install Docker Compose
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y docker-compose
-
-    - name: Build Docker image using docker-compose.local.yml
-      run: docker-compose -f docker-compose.local.yml build | tee docker-build-log.txt
-
-    - name: Verify Docker image is built
-      run: |
-        docker images | grep brokencrystals_nodejs || { echo "Image brokencrystals_nodejs:latest not found."; exit 1; }
-
-    - name: Tag Docker Image
-      run: |
-        docker tag brokencrystals_nodejs:latest docker.io/${{ secrets.DOCKER_HUB_USERNAME }}/brokencrystals_nodejs:${{ github.sha }}
-
-    - name: Log in to Docker Hub
-      run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
-
-    - name: Push Docker image to Docker Hub
-      run: docker push docker.io/${{ secrets.DOCKER_HUB_USERNAME }}/brokencrystals_nodejs:${{ github.sha }}
+# Add other steps for your build and deployment as needed
