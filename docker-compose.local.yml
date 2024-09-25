@@ -40,7 +40,7 @@ services:
         max-size: '10m'
     depends_on:
       - db
-    image: brokencrystals:latest  # Add this line to specify the image name and tag
+    # image: brokencrystals:latest  # Add this line to specify the image name and tag
 
   mailcatcher:
     image: sj26/mailcatcher
