@@ -17,19 +17,31 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
 
-    # Build Docker image
-    - name: Build Docker image
-      run: docker build -t brokencrystals:${{ github.sha }} . | tee docker-build-log.txt
+    # # Build Docker image
+    # - name: Build Docker image
+    #   run: docker build -t brokencrystals:${{ github.sha }} . | tee docker-build-log.txt
+
+    # Build Docker image for local environment
+    - name: Build Docker image using docker-compose.local.yml
+      run: docker-compose -f docker-compose.local.yml build | tee docker-build-log.txt
 
     # Scan Docker image with Trivy
     - name: Scan Docker Image with Trivy
+
       run: |
         docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image brokencrystals:${{ github.sha }} \
         --format template --template "@contrib/html.tpl" -o trivy-scan-report.html
 
-    #   run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-    # - name: Push Docker image
-    #   run: docker push myapp:${{ github.sha }}
+    # Log in to Docker Hub
+    - name: Log in to Docker Hub
+      #   run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+      #   run: docker push myapp:${{ github.sha }}
+      # - name: Push Docker image
+      run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
+
+    - name: Push Docker image to Docker Hub
+      # Push Docker image to Docker Hub
+      run: docker push docker.io/ziemieu86/brokencrystals:${{ github.sha }}
 
     # # Deploy to Kubernetes
     # - name: Deploy to Kubernetes
@@ -38,6 +50,7 @@ jobs:
     # Run OWASP ZAP for DAST
     - name: Run OWASP ZAP DAST
       # # Push Docker image to Docker Hub or ECR
+
       # - name: Log in to Docker Hub
       run: |
         docker run -v $(pwd):/zap/wrk/:rw --network="host" owasp/zap2docker-stable zap-baseline.py \
