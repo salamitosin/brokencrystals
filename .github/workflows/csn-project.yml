@@ -21,31 +21,36 @@ jobs:
     - name: Build Docker image using docker-compose.local.yml
       run: docker-compose -f docker-compose.local.yml build | tee docker-build-log.txt
 
-    # Log in to Docker Hub
+    # Tag the image (make sure to adjust according to your docker-compose setup)
+    - name: Tag Docker Image
+      run: |
+        docker tag <your_docker_image_name>:<tag> brokencrystals:latest
+
     - name: Log in to Docker Hub
+      # Log in to Docker Hub
       run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
 
-    # # Scan Docker image with Docker Scout
-    # - name: Scan with Docker Scout
-    #   run: |
-    #     docker run --rm \
-    #     -v /var/run/docker.sock:/var/run/docker.sock \
-    #     docker/scout:latest \
-    #     scout brokencrystals:latest --output scout-report.html
+    # Push Docker image to Docker Hub
+    - name: Push Docker image to Docker Hub
+      run: docker push docker.io/ziemieu86/brokencrystals:latest
+
+    # Scan Docker image with Docker Scout
+    - name: Scan with Docker Scout
+      run: |
+        docker run --rm \
+        -v /var/run/docker.sock:/var/run/docker.sock \
+        docker/scout:latest \
+        scout brokencrystals:latest --output scout-report.html
 
     - name: Scan Docker Image with Trivy
       # Scan Docker image with Trivy
       run: |
         docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
-        aquasec/trivy image brokencrystals:latest \
+        aquasec/trivy image docker.io/ziemieu86/brokencrystals:latest \
         --format template --template "@contrib/html.tpl" -o trivy-scan-report.html
 
-    - name: Push Docker image to Docker Hub
-      # Push Docker image to Docker Hub
-      run: docker push docker.io/ziemieu86/brokencrystals:latest
-
-    # Run OWASP ZAP for DAST
     - name: Run OWASP ZAP DAST
+      # Run OWASP ZAP for DAST
       run: |
         docker run -v $(pwd):/zap/wrk/:rw --network="host" owasp/zap2docker-stable zap-baseline.py \
         -t http://localhost:3000 -r owasp-zap-dast-report.html
