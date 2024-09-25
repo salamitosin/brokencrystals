@@ -29,26 +29,26 @@ jobs:
       run: |
         docker images | grep brokencrystals_nodejs || { echo "Image brokencrystals_nodejs:latest not found."; exit 1; }
 
-    #     docker tag  brokencrystals_nodejs:latest docker.io/ziemieu86/brokencrystals_nodejs:latest:${{ github.sha }}
+    - name: Tag Docker Image
+      run: |
+        docker tag brokencrystals_nodejs:latest docker.io/${{ secrets.DOCKER_HUB_USERNAME }}/brokencrystals_nodejs:${{ github.sha }}
 
     - name: Log in to Docker Hub
-      # - name: Tag Docker Image
-      #   run: |
       run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
 
     - name: Push Docker image to Docker Hub
-      run: docker push docker.io/ziemieu86/brokencrystals_nodejs:${{ github.sha }}
+      run: docker push docker.io/${{ secrets.DOCKER_HUB_USERNAME }}/brokencrystals_nodejs:${{ github.sha }}
 
     - name: Scan with Docker Scout
       run: |
         docker run --rm \
         -v /var/run/docker.sock:/var/run/docker.sock \
         docker/scout:latest \
-        scout docker.io/ziemieu86/brokencrystals_nodejs:${{ github.sha }} --output scout-report.html
+        scout docker.io/${{ secrets.DOCKER_HUB_USERNAME }}/brokencrystals_nodejs:${{ github.sha }} --output scout-report.html
 
     - name: Scan Docker Image with Trivy
       run: |
-        docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image docker.io/ziemieu86/brokencrystals_nodejs:${{ github.sha }} \
+        docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image docker.io/${{ secrets.DOCKER_HUB_USERNAME }}/brokencrystals_nodejs:${{ github.sha }} \
         --format template --template "@contrib/html.tpl" -o trivy-scan-report.html
 
     - name: Run OWASP ZAP DAST
