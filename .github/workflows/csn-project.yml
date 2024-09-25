@@ -20,9 +20,13 @@ jobs:
     - name: Build Docker image using docker-compose.local.yml
       run: docker-compose -f docker-compose.local.yml build | tee docker-build-log.txt
 
+    - name: Verify Docker image is built
+      run: |
+        docker images | grep brokencrystals || { echo "Image brokencrystals:latest not found."; exit 1; }
+
     - name: Tag Docker Image
       run: |
-        docker tag brokencrystals:latest docker.io/ziemieu86/brokencrystals:${{ github.sha }}
+        docker tag <your_docker_image_name>:latest docker.io/ziemieu86/brokencrystals:${{ github.sha }}
 
     - name: Log in to Docker Hub
       run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
