@@ -27,7 +27,7 @@ jobs:
 
     - name: Verify Docker image is built
       run: |
-        docker images | grepbrokencrystals_nodejs || { echo "Image brokencrystals_nodejs:latest not found."; exit 1; }
+        docker images | grep brokencrystals_nodejs || { echo "Image brokencrystals_nodejs:latest not found."; exit 1; }
 
     - name: Tag Docker Image
       run: |
