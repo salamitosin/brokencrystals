@@ -3,20 +3,19 @@ name: "CI/CD with Security Best Practices"
 on:
   push:
     branches:
-      - stable
-      - main
+    - stable
+    - main
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
 
-<<<<<<< HEAD
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
+
     - name: SonarQube Scan SAST
       uses: sonarsource/sonarqube-scan-action@master
       env:
@@ -47,12 +46,3 @@ jobs:
 
 # - name: Push Docker image to Docker Hub
 #   run: docker push docker.io/${{ secrets.DOCKER_HUB_USERNAME }}/brokencrystals_nodejs:${{ github.sha }}
-=======
-      - name: SonarQube Scan
-        uses: sonarsource/sonarqube-scan-action@master
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: "http://localhost:9000"
-        
-      # Add other steps for your build and deployment as needed
->>>>>>> 3de7d34df075104771fa300f88f12c80d164bccb
