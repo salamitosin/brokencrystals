@@ -29,11 +29,11 @@ jobs:
       run: |
         docker images | grep brokencrystals_nodejs || { echo "Image brokencrystals_nodejs:latest not found."; exit 1; }
 
-    - name: Tag Docker Image
-      run: |
-        docker tag  brokencrystals_nodejs:latest docker.io/ziemieu86/brokencrystals_nodejs:latest:${{ github.sha }}
+    #   run: |
+    #     docker tag  brokencrystals_nodejs:latest docker.io/ziemieu86/brokencrystals_nodejs:latest:${{ github.sha }}
 
     - name: Log in to Docker Hub
+      # - name: Tag Docker Image
       run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
 
     - name: Push Docker image to Docker Hub
