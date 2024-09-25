@@ -29,8 +29,12 @@ jobs:
         docker/scout:latest \
         scout brokencrystals:latest --output scout-report.html
 
+    - name: Log in to Docker Hub (if necessary)
+      # If the image doesn't exist, consider using the correct one or logging into Docker
+      run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin || echo "Login failed, check credentials"
+
+    # Scan Docker image with Trivy
     - name: Scan Docker Image with Trivy
-      # Scan Docker image with Trivy
       run: |
         docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
         aquasec/trivy image brokencrystals:latest \
@@ -78,17 +82,6 @@ jobs:
         name: docker-build-log
         path: docker-build-log.txt
 
-# Commit Scan Results to Repo (Optional)
-# Uncomment if you want to commit the reports to the repo
-# - name: Commit Scan Reports
-#   run: |
-#     git config --global user.email "ci-bot@mycompany.com"
-#     git config --global user.name "CI Bot"
-#     git checkout ${{ github.ref }}
-#     git add scout-report.html trivy-scan-report.html owasp-zap-dast-report.html docker-build-log.txt
-#     git commit -m "Add CI/CD scan results and build logs"
-#     git push
-
-# # View the Docker image in the browser
+# # View Docker image in the browser
 # - name: View Docker Image
 #   run: echo "Docker image is available at: https://hub.docker.com/r/ziemieu86/brokencrystals"
