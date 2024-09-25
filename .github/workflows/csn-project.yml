@@ -21,6 +21,10 @@ jobs:
     - name: Build Docker image using docker-compose.local.yml
       run: docker-compose -f docker-compose.local.yml build | tee docker-build-log.txt
 
+    # Log in to Docker Hub
+    - name: Log in to Docker Hub
+      run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
+
     # Scan Docker image with Docker Scout
     - name: Scan with Docker Scout
       run: |
@@ -29,23 +33,15 @@ jobs:
         docker/scout:latest \
         scout brokencrystals:latest --output scout-report.html
 
-    - name: Log in to Docker Hub (if necessary)
-      # If the image doesn't exist, consider using the correct one or logging into Docker
-      run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin || echo "Login failed, check credentials"
-
-    # Scan Docker image with Trivy
     - name: Scan Docker Image with Trivy
+      # Scan Docker image with Trivy
       run: |
         docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
         aquasec/trivy image brokencrystals:latest \
         --format template --template "@contrib/html.tpl" -o trivy-scan-report.html
 
-    - name: Log in to Docker Hub
-      # Log in to Docker Hub
-      run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
-
-    # Push Docker image to Docker Hub
     - name: Push Docker image to Docker Hub
+      # Push Docker image to Docker Hub
       run: docker push docker.io/ziemieu86/brokencrystals:latest
 
     # Run OWASP ZAP for DAST
