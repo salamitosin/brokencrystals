@@ -4,6 +4,7 @@ on:
   push:
     branches:
     - stable
+    - main
 
 jobs:
   build-and-deploy:
@@ -26,7 +27,6 @@ jobs:
         docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image brokencrystals:${{ github.sha }} \
         --format template --template "@contrib/html.tpl" -o trivy-scan-report.html
 
-    # - name: Log in to Docker Hub
     #   run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
     # - name: Push Docker image
     #   run: docker push myapp:${{ github.sha }}
@@ -38,6 +38,7 @@ jobs:
     # Run OWASP ZAP for DAST
     - name: Run OWASP ZAP DAST
       # # Push Docker image to Docker Hub or ECR
+      # - name: Log in to Docker Hub
       run: |
         docker run -v $(pwd):/zap/wrk/:rw --network="host" owasp/zap2docker-stable zap-baseline.py \
           -t http://localhost:3000 -r owasp-zap-dast-report.html
