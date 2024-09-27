@@ -19,7 +19,7 @@ jobs:
       with:
         fetch-depth: 0 # Shallow clones should be disabled for better relevancy of analysis
 
-    - name: SonarQube Scan SAST
+    - name: SonarQube Scan SAST A
       uses: SonarSource/sonarcloud-github-action@master
       env:
         GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }} # Needed to get PR information, if any
