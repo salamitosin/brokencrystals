@@ -5,7 +5,6 @@ on:
     branches:
     - stable
     - main
-
   pull_request:
     types: [opened, synchronize, reopened]
 
@@ -28,14 +27,14 @@ jobs:
     - name: Install dependency for scanning
       run: npm install
 
-    # steps:
     - name: Install Trivy
       run: |
         sudo apt-get update
-        sudo apt-get install -y software-properties-common
-        sudo add-apt-repository ppa:aquasecurity/trivy
-        sudo apt-get update
-        sudo apt-get install -y trivy
+        sudo apt-get install -y curl
+        TRIVY_VERSION=0.34.0 # Update to the latest version as needed
+        curl -sSL https://github.com/aquasecurity/trivy/releases/download/v$TRIVY_VERSION/trivy_0.34.0_Linux-64bit.deb -o trivy.deb
+        sudo dpkg -i trivy.deb
+        rm trivy.deb
 
     - name: Install Scout
       run: |
@@ -46,6 +45,7 @@ jobs:
 
     - name: Run Scout
       run: scout monitor
+
 
 
 # Optional Docker steps
