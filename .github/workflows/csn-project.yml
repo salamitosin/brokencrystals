@@ -36,11 +36,11 @@ jobs:
         sudo dpkg -i trivy.deb
         rm trivy.deb
 
-    #     curl -sSL https://get.scoutapm.com/scout-install.sh | bash
     #     echo 'export PATH="$HOME/.scout/bin:$PATH"' >> $GITHUB_ENV
 
     - name: Run Trivy
       #   run: |
+      #     curl -sSL https://get.scoutapm.com/scout-install.sh | bash
       run: trivy fs . > trivyfs.txt
 
     - name: Commit Trivy Report
@@ -48,9 +48,8 @@ jobs:
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git add trivyfs.txt
-        git commit -m "Add Trivy scan report"
+        git commit -m "Add Trivy scan report" --no-verify
         git push origin HEAD:${{ github.ref }} # Push to the same branch
-
 
 
 # Optional Docker steps
