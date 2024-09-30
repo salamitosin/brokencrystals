@@ -39,6 +39,7 @@ jobs:
     - name: Install Scout
       run: |
         curl -sSL https://get.scoutapm.com/scout-install.sh | bash
+        echo 'export PATH="$HOME/.scout/bin:$PATH"' >> $GITHUB_ENV
 
     - name: Run Trivy
       run: trivy fs . > trivyfs.txt
