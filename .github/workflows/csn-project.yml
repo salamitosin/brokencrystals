@@ -36,16 +36,16 @@ jobs:
         sudo dpkg -i trivy.deb
         rm trivy.deb
 
-    - name: Install Scout
-      run: |
-        curl -sSL https://get.scoutapm.com/scout-install.sh | bash
-        echo 'export PATH="$HOME/.scout/bin:$PATH"' >> $GITHUB_ENV
+    #   run: |
+    #     curl -sSL https://get.scoutapm.com/scout-install.sh | bash
+    #     echo 'export PATH="$HOME/.scout/bin:$PATH"' >> $GITHUB_ENV
 
     - name: Run Trivy
+      # - name: Install Scout
       run: trivy fs . > trivyfs.txt
 
-    - name: Run Scout
-      run: scout monitor
+    # - name: Run Scout
+    #   run: scout monitor
 
 
 
