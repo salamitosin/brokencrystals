@@ -36,16 +36,20 @@ jobs:
         sudo dpkg -i trivy.deb
         rm trivy.deb
 
-    #   run: |
     #     curl -sSL https://get.scoutapm.com/scout-install.sh | bash
     #     echo 'export PATH="$HOME/.scout/bin:$PATH"' >> $GITHUB_ENV
 
     - name: Run Trivy
-      # - name: Install Scout
+      #   run: |
       run: trivy fs . > trivyfs.txt
 
-    # - name: Run Scout
-    #   run: scout monitor
+    - name: Commit Trivy Report
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add trivyfs.txt
+        git commit -m "Add Trivy scan report"
+        git push origin HEAD:${{ github.ref }} # Push to the same branch
 
 
 
