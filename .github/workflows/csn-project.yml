@@ -24,6 +24,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }} # Needed to get PR information, if any
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    - name: Install dependency for scanning
+      run: npm install
 
 
 # Optional Docker steps
