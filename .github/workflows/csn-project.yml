@@ -39,13 +39,13 @@ jobs:
     - name: Run Trivy
       run: trivy fs . > trivyfs.txt
 
-    - name: Commit Trivy Report
-      run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git add trivyfs.txt
-        git commit -m "Add Trivy scan report" --no-verify
-        git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} HEAD:${{ github.ref }}
+    # - name: Commit Trivy Report
+    #   run: |
+    #     git config --local user.email "action@github.com"
+    #     git config --local user.name "GitHub Action"
+    #     git add trivyfs.txt
+    #     git commit -m "Add Trivy scan report" --no-verify
+    #     git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} HEAD:${{ github.ref }}
 
 
     - name: Install Docker Compos
