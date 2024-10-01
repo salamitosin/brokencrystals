@@ -51,7 +51,7 @@ jobs:
         git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} HEAD:${{ github.ref }}
 
 
-    - name: Install Docker Compos
+    - name: Install Docker Comp
       # Optional Docker steps
       # - name: Set up Docker Buildx
       #   uses: docker/setup-buildx-action@v2
