@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: brokencrystals-deployment
+  labels:
+    app: brokencrystals
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: brokencrystals
+  template:
+    metadata:
+      labels:
+        app: brokencrystals
+    spec:
+      containers:
+      - name: brokencrystals-app
+        image: brokencrystals:latest # Ensure this matches your local image name
+        imagePullPolicy: IfNotPresent # Use local images if available
+        ports:
+        - containerPort: 3000
+        env:
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: db-secrets
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-secrets
+              key: POSTGRES_PASSWORD
+        - name: POSTGRES_DB
+          valueFrom:
+            secretKeyRef:
+              name: db-secrets
+              key: POSTGRES_DB
+        - name: DATABASE_URL
+          value: "postgresql://bc:bc@db:5432/bc" # Fallback URL
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: brokencrystals-service
+spec:
+  type: NodePort
+  selector:
+    app: brokencrystals
+  ports:
+  - port: 3000
+    targetPort: 3000
+    nodePort: 30080
